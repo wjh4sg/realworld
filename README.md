@@ -51,6 +51,14 @@ Dockerfile      多阶段构建镜像
 
 ### 方式一：Docker
 
+先复制一份环境文件并替换其中的占位密码和 JWT 密钥：
+
+```bash
+cp .env.example .env
+```
+
+`.env.example` 里的值只是安全占位符，不应该直接用于共享环境、云环境或公网机器。
+
 ```bash
 docker compose up --build -d
 ```
@@ -79,13 +87,15 @@ curl http://localhost:18080/metrics/cache
 go run ./apiserver
 ```
 
+如果使用仓库里的 `config.yaml`，请先把其中的占位密码和 `jwt.secret` 改成你自己的本地值，或者直接通过环境变量覆盖。
+
 示例环境变量：
 
 ```powershell
 $env:CONFIG_PATH = "./config.yaml"
 $env:MYSQL_ADDR = "127.0.0.1:3306"
 $env:REDIS_ADDR = "127.0.0.1:6379"
-$env:JWT_SECRET = "replace-me"
+$env:JWT_SECRET = "change-this-local-dev-jwt-secret"
 ```
 
 ## 内嵌前端
@@ -134,6 +144,12 @@ DELETE /api/comments/:id
 ## 配置
 
 配置先从 `config.yaml` 加载，再由环境变量覆盖。
+
+注意：
+
+- 仓库里的 `config.yaml`、`apiserver/config.yaml`、`.env.example` 都只保留了占位符，不能视为生产可用配置
+- 不要把真实数据库密码、JWT secret 或其他密钥提交到 Git
+- 如果真实密钥已经提交过，当前修改只能阻止继续泄露，不能消除历史中的旧值；处理步骤见 `docs/secret-cleanup.md`
 
 常用环境变量：
 
@@ -184,5 +200,6 @@ go test -tags=integration ./apiserver/test
 ## 开发说明
 
 - `docs/runtime.md` 记录了运行链路和请求链路
+- `docs/secret-cleanup.md` 记录了敏感信息轮换与 Git 历史清理方案
 - `api/api.md` 是接口契约
 - `api/Conduit.postman_collection.json` 可用于手工接口验证

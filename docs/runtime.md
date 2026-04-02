@@ -41,22 +41,26 @@ Start dependencies yourself, then run:
 go run ./apiserver
 ```
 
+Before local startup, replace the placeholder MySQL password and JWT secret in `config.yaml`, or override them with environment variables. The tracked config files are templates, not trusted secrets.
+
 Useful environment overrides:
 
 ```powershell
 $env:CONFIG_PATH = "./config.yaml"
 $env:MYSQL_ADDR = "127.0.0.1:3306"
 $env:REDIS_ADDR = "127.0.0.1:6379"
-$env:JWT_SECRET = "replace-me"
+$env:JWT_SECRET = "change-this-local-dev-jwt-secret"
 ```
 
 ## Docker Run
 
-Copy `.env.example` to `.env` if you want custom host ports or secrets, then run:
+Copy `.env.example` to `.env`, replace the placeholder passwords and JWT secret, then run:
 
 ```bash
 docker compose up --build
 ```
+
+The values committed in `.env.example` and `compose.yaml` are safe placeholders for local setup only. Treat them as examples, not as deployed credentials.
 
 Default host ports:
 
