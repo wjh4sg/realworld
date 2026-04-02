@@ -1,31 +1,31 @@
-# RealWorld API Server
+# RealWorld API 服务
 
-A production-style RealWorld backend implemented with Go, Gin, MySQL, Redis, and a lightweight embedded web UI.
+这是一个基于 Go、Gin、MySQL、Redis 实现的 RealWorld / Conduit 风格后端项目，并内置了一个轻量级前端页面，方便本地联调和日常使用。
 
-This project focuses on:
+项目当前重点包括：
 
-- clean request flow: `middleware -> handler -> biz -> store -> MySQL/Redis`
-- RealWorld / Conduit-style API behavior under `/api`
-- optional auth on public read endpoints
-- Docker-first local startup
-- Redis + in-process cache support
-- health and metrics endpoints for validation and debugging
+- 清晰的请求链路：`middleware -> handler -> biz -> store -> MySQL/Redis`
+- 基于 `/api` 的 RealWorld 风格接口
+- 公共读取接口支持可选登录态
+- 优先支持 Docker 本地启动
+- Redis + 本地缓存
+- 健康检查和指标接口
 
-## Features
+## 功能概览
 
-- User registration, login, current user, profile update
-- JWT access token + refresh token flow
-- Profile lookup, follow, unfollow
-- Article create, list, detail, update, delete
-- Tag filtering, author filtering, favorited filtering
-- Feed endpoint for authenticated users
-- Comment create, list, delete
-- Tags endpoint
-- Health endpoints: `/healthz`, `/readyz`
-- Metrics endpoints: `/metrics`, `/metrics/concurrency`, `/metrics/cache`
-- Embedded browser UI at `/ui/`
+- 用户注册、登录、获取当前用户、更新用户
+- JWT access token + refresh token 机制
+- 用户资料查询、关注、取消关注
+- 文章创建、列表、详情、更新、删除
+- 按作者、标签、收藏用户筛选文章
+- 已登录用户的个人 Feed
+- 评论创建、查询、删除
+- 标签列表
+- 健康检查：`/healthz`、`/readyz`
+- 指标接口：`/metrics`、`/metrics/concurrency`、`/metrics/cache`
+- 内嵌浏览器 UI：`/ui/`
 
-## Tech Stack
+## 技术栈
 
 - Go
 - Gin
@@ -34,34 +34,34 @@ This project focuses on:
 - Redis 7
 - Docker Compose
 
-## Project Structure
+## 目录结构
 
 ```text
-api/            API contract and Postman collection
-apiserver/      HTTP server, handlers, biz, store, middleware, UI
-common/         shared database helpers
-config/         config loading and env override logic
-docs/           runtime and architecture notes
-db.sql          database schema and init script
-compose.yaml    local full-stack Docker setup
-Dockerfile      multi-stage application image
+api/            API 契约文档与 Postman 集合
+apiserver/      HTTP 服务、handler、biz、store、middleware、UI
+common/         通用数据库辅助代码
+config/         配置加载与环境变量覆盖
+docs/           运行与架构说明
+db.sql          数据库初始化脚本
+compose.yaml    本地全栈 Docker 编排
+Dockerfile      多阶段构建镜像
 ```
 
-## Quick Start
+## 快速开始
 
-### Option 1: Docker
+### 方式一：Docker
 
 ```bash
 docker compose up --build -d
 ```
 
-Default services:
+默认端口：
 
-- API: `http://localhost:18080`
-- MySQL: `127.0.0.1:13306`
-- Redis: `127.0.0.1:16379`
+- API：`http://localhost:18080`
+- MySQL：`127.0.0.1:13306`
+- Redis：`127.0.0.1:16379`
 
-Useful checks:
+常用检查：
 
 ```bash
 curl http://localhost:18080/healthz
@@ -71,15 +71,15 @@ curl http://localhost:18080/api/tags
 curl http://localhost:18080/metrics/cache
 ```
 
-### Option 2: Local run
+### 方式二：本地运行
 
-Start MySQL and Redis first, then run:
+先启动 MySQL 和 Redis，再执行：
 
 ```bash
 go run ./apiserver
 ```
 
-Example environment overrides:
+示例环境变量：
 
 ```powershell
 $env:CONFIG_PATH = "./config.yaml"
@@ -88,54 +88,54 @@ $env:REDIS_ADDR = "127.0.0.1:6379"
 $env:JWT_SECRET = "replace-me"
 ```
 
-## Embedded UI
+## 内嵌前端
 
-The project includes a simple embedded frontend for manual testing and day-to-day usage.
+项目内置了一个简易前端页面，便于手工验证接口和日常操作。
 
-- Root entry: `http://localhost:18080/`
-- Direct UI path: `http://localhost:18080/ui/`
+- 首页入口：`http://localhost:18080/`
+- UI 直达：`http://localhost:18080/ui/`
 
-The UI supports:
+目前支持：
 
-- register / login
-- current user lookup
-- token refresh
-- article create / edit / delete
-- article filtering
-- favorites
-- comment create / delete
+- 注册 / 登录
+- 获取当前用户
+- 刷新 token
+- 文章创建 / 编辑 / 删除
+- 文章筛选
+- 收藏文章
+- 评论创建 / 删除
 
-## API Notes
+## API 说明
 
-- API base path: `/api`
-- Auth header format: `Authorization: Token <token>`
-- Public read routes support optional auth
-- Canonical comment delete route:
+- API 前缀：`/api`
+- 鉴权头格式：`Authorization: Token <token>`
+- 公共读取接口支持可选登录态
+- 标准评论删除路由：
 
 ```text
 DELETE /api/articles/:slug/comments/:id
 ```
 
-- Compatibility route kept for older clients:
+- 为兼容旧调用，仍保留：
 
 ```text
 DELETE /api/comments/:id
 ```
 
-## Rate Limiting
+## 限流
 
-API requests are limited with fixed windows that match the repository contract:
+当前 API 限流与仓库契约保持一致：
 
-- 60 requests per minute
-- 1000 requests per hour
+- 每分钟 60 次请求
+- 每小时 1000 次请求
 
-Authenticated requests are keyed per user/token, while anonymous requests fall back to client IP.
+已登录请求按用户或 token 计数，匿名请求按客户端 IP 计数。
 
-## Configuration
+## 配置
 
-Configuration is loaded from `config.yaml`, then overridden by environment variables.
+配置先从 `config.yaml` 加载，再由环境变量覆盖。
 
-Important variables:
+常用环境变量：
 
 - `SERVER_PORT`
 - `SERVER_RATE_LIMIT_PER_MINUTE`
@@ -149,41 +149,40 @@ Important variables:
 - `REDIS_DB`
 - `JWT_SECRET`
 
-## Tests
+## 测试
 
-Default test run:
+默认测试：
 
 ```bash
 go test ./...
 ```
 
-Integration tests require a running service stack:
+集成测试需要服务已启动：
 
 ```bash
 go test -tags=integration ./apiserver/test
 ```
 
-There are also dedicated handler and middleware contract-alignment tests covering:
+此外还补了接口契约对齐测试，覆盖：
 
-- user response body shape
-- update-user conflict handling
-- article pagination parameters
-- delete status codes
-- rate limiting behavior
+- 用户响应体字段
+- 更新用户时的冲突处理
+- 文章分页参数
+- 删除接口状态码
+- 限流行为
 
-## Contract Alignment
+## 契约对齐说明
 
-The implementation has been aligned with the repository API contract for these key items:
+当前实现已经和仓库中的 API 契约对齐了这些关键点：
 
-- `PUT /api/user` returns `400` on duplicate username/email
-- `GET /api/articles` supports `page` + `limit`
-- successful article/comment deletes return `200 OK`
-- user auth responses return only contract fields in JSON body
-- refresh token is exposed through the `X-Refresh-Token` response header for UI compatibility
+- `PUT /api/user` 在用户名或邮箱冲突时返回 `400`
+- `GET /api/articles` 支持 `page` + `limit`
+- 删除文章和删除评论成功时返回 `200 OK`
+- 用户认证相关响应体只返回契约定义字段
+- refresh token 通过 `X-Refresh-Token` 响应头暴露，兼容当前 UI 使用
 
-## Development Notes
+## 开发说明
 
-- `docs/runtime.md` contains the request flow and runtime notes
-- `api/api.md` contains the API contract
-- `api/Conduit.postman_collection.json` contains manual API assets
-
+- `docs/runtime.md` 记录了运行链路和请求链路
+- `api/api.md` 是接口契约
+- `api/Conduit.postman_collection.json` 可用于手工接口验证
