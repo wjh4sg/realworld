@@ -1,0 +1,38 @@
+# 通用配置
+#
+
+# 服务器相关配置
+server:
+  # 服务器端口，默认 8080
+  port: "8080"
+
+# MySQL 数据库相关配置
+mysql:
+  # MySQL 机器 IP 和端口，默认 127.0.0.1:3306
+  addr: 127.0.0.1:3306
+  # MySQL 用户名(建议授权最小权限集)
+  username: realworld
+  # MySQL 用户密码
+  password: "change-this-local-dev-app-password"
+  # realworld 系统所用的数据库名
+  database: realworld
+  # MySQL 最大空闲连接数，默认 100
+  max-idle-connections: 100
+  # MySQL 最大打开的连接数，默认 100
+  max-open-connections: 100
+  # 空闲连接最大存活时间，默认 10s
+  max-connection-life-time: 10s
+
+# Redis 缓存相关配置
+redis:
+  # Redis 机器 IP 和端口，默认 127.0.0.1:6379
+  addr: 127.0.0.1:6379
+  # Redis 密码，默认为空
+  password: ""
+  # Redis 数据库索引，默认 0
+  db: 0
+
+# JWT 相关配置
+jwt:
+  # JWT 密钥，用于生成和验证令牌
+  secret: "change-this-local-dev-jwt-secret"

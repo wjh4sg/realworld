@@ -1,0 +1,12 @@
+.git
+.gitignore
+.qoder
+.trae
+bin/
+**/*.exe
+**/*.log
+**/*.out
+coverage/
+dist/
+.reports/
+node_modules/

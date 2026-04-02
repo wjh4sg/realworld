@@ -1,0 +1,13 @@
+bin/
+coverage/
+dist/
+.reports/
+.qoder/
+.trae/
+.idea/
+.vscode/
+*.exe
+*.log
+*.out
+.env
+.DS_Store

@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RealWorld Console</title>
+  <link rel="stylesheet" href="/ui/styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">RealWorld Backend Console</p>
+        <h1>一个够用、顺手、直接连后端的简易前端</h1>
+        <p class="hero-text">
+          可以在这里注册、登录、刷新令牌、发文、筛选文章、收藏、评论和删除评论。
+          页面默认直连当前服务的 <code>/api</code>。
+        </p>
+      </div>
+      <div class="hero-status">
+        <div class="status-card">
+          <span class="status-label">服务状态</span>
+          <strong id="ready-status">检测中</strong>
+        </div>
+        <div class="status-card">
+          <span class="status-label">登录状态</span>
+          <strong id="session-status">未登录</strong>
+        </div>
+        <div class="status-actions">
+          <button type="button" class="ghost-button" id="refresh-health">刷新健康检查</button>
+          <a class="ghost-button" href="/metrics/cache" target="_blank" rel="noreferrer">缓存指标</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="rail">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>身份与令牌</h2>
+            <button type="button" class="ghost-button" id="logout-button">退出登录</button>
+          </div>
+
+          <form id="register-form" class="form-block">
+            <h3>注册</h3>
+            <label>
+              用户名
+              <input name="username" type="text" placeholder="new-user" required>
+            </label>
+            <label>
+              邮箱
+              <input name="email" type="email" placeholder="name@example.com" required>
+            </label>
+            <label>
+              密码
+              <input name="password" type="password" placeholder="至少自己记得住" required>
+            </label>
+            <button type="submit" class="primary-button">注册并登录</button>
+          </form>
+
+          <form id="login-form" class="form-block">
+            <h3>登录</h3>
+            <label>
+              邮箱
+              <input name="email" type="email" placeholder="name@example.com" required>
+            </label>
+            <label>
+              密码
+              <input name="password" type="password" placeholder="你的密码" required>
+            </label>
+            <div class="button-row">
+              <button type="submit" class="primary-button">登录</button>
+              <button type="button" class="ghost-button" id="refresh-token-button">刷新令牌</button>
+            </div>
+          </form>
+
+          <div class="session-card">
+            <div class="session-row">
+              <span>当前用户</span>
+              <strong id="current-user-name">未登录</strong>
+            </div>
+            <div class="session-row">
+              <span>当前邮箱</span>
+              <strong id="current-user-email">-</strong>
+            </div>
+            <div class="button-row">
+              <button type="button" class="ghost-button" id="load-current-user">刷新当前用户</button>
+            </div>
+            <label>
+              Access Token
+              <textarea id="access-token" rows="3" readonly placeholder="登录后自动填充"></textarea>
+            </label>
+            <label>
+              Refresh Token
+              <textarea id="refresh-token" rows="3" readonly placeholder="注册或登录后自动填充"></textarea>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2 id="editor-title">发布文章</h2>
+            <button type="button" class="ghost-button" id="cancel-edit-button" hidden>取消编辑</button>
+          </div>
+
+          <form id="article-form" class="form-block">
+            <label>
+              标题
+              <input name="title" type="text" placeholder="给文章起个清楚的名字" required>
+            </label>
+            <label>
+              描述
+              <input name="description" type="text" placeholder="一句话概括这篇文章" required>
+            </label>
+            <label>
+              正文
+              <textarea name="body" rows="8" placeholder="正文内容" required></textarea>
+            </label>
+            <label>
+              标签
+              <input name="tags" type="text" placeholder="用逗号分隔，比如 docker, gin, mysql">
+            </label>
+            <div class="button-row">
+              <button type="submit" class="primary-button" id="article-submit-button">发布文章</button>
+              <button type="button" class="ghost-button" id="load-selected-into-editor">载入当前文章</button>
+            </div>
+          </form>
+
+          <div class="tag-pool">
+            <div class="inline-head">
+              <h3>热门标签</h3>
+              <button type="button" class="ghost-button" id="reload-tags">刷新标签</button>
+            </div>
+            <div id="tag-cloud" class="chip-cloud"></div>
+          </div>
+        </section>
+      </aside>
+
+      <section class="panel browser-panel">
+        <div class="panel-head">
+          <h2>文章浏览</h2>
+          <div class="button-row">
+            <button type="button" class="ghost-button" id="show-global-feed">全部文章</button>
+            <button type="button" class="ghost-button" id="show-personal-feed">我的 Feed</button>
+            <button type="button" class="ghost-button" id="reload-articles">刷新列表</button>
+          </div>
+        </div>
+
+        <form id="filters-form" class="filter-grid">
+          <label>
+            作者
+            <input name="author" type="text" placeholder="按作者用户名筛选">
+          </label>
+          <label>
+            标签
+            <input name="tag" type="text" placeholder="按标签筛选">
+          </label>
+          <label>
+            收藏者
+            <input name="favorited" type="text" placeholder="按收藏用户筛选">
+          </label>
+          <label>
+            offset
+            <input name="offset" type="number" min="0" value="0">
+          </label>
+          <label>
+            limit
+            <input name="limit" type="number" min="1" max="100" value="20">
+          </label>
+          <div class="button-row filter-actions">
+            <button type="submit" class="primary-button">应用筛选</button>
+            <button type="button" class="ghost-button" id="clear-filters">清空</button>
+          </div>
+        </form>
+
+        <div class="list-meta">
+          <span id="articles-summary">正在加载文章…</span>
+        </div>
+
+        <div id="articles-list" class="article-list"></div>
+      </section>
+
+      <section class="panel detail-panel">
+        <div id="empty-detail" class="empty-state">
+          <p>从左侧列表选择一篇文章，这里会显示详情、作者信息和评论。</p>
+        </div>
+
+        <article id="article-detail" class="article-detail" hidden>
+          <div class="detail-header">
+            <div>
+              <p class="eyebrow" id="detail-slug">slug</p>
+              <h2 id="detail-title">文章标题</h2>
+            </div>
+            <div class="button-row">
+              <button type="button" class="ghost-button" id="refresh-detail-button">刷新详情</button>
+              <button type="button" class="ghost-button" id="favorite-button">收藏</button>
+              <button type="button" class="ghost-button" id="load-article-edit-button">编辑</button>
+              <button type="button" class="danger-button" id="delete-article-button">删除</button>
+            </div>
+          </div>
+
+          <div class="detail-meta">
+            <span id="detail-author">作者：-</span>
+            <span id="detail-created">创建：-</span>
+            <span id="detail-updated">更新：-</span>
+            <span id="detail-favorites">收藏：0</span>
+          </div>
+
+          <p id="detail-description" class="detail-description"></p>
+          <pre id="detail-body" class="detail-body"></pre>
+          <div id="detail-tags" class="chip-cloud"></div>
+
+          <section class="comments-panel">
+            <div class="inline-head">
+              <h3>评论</h3>
+              <span id="comments-summary">0 条评论</span>
+            </div>
+
+            <form id="comment-form" class="form-block compact-form">
+              <label>
+                添加评论
+                <textarea name="body" rows="3" placeholder="写点内容…" required></textarea>
+              </label>
+              <button type="submit" class="primary-button">提交评论</button>
+            </form>
+
+            <div id="comments-list" class="comments-list"></div>
+          </section>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+  <script src="/ui/app.js"></script>
+</body>
+</html>

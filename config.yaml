@@ -1,0 +1,21 @@
+server:
+  port: "8080"
+  rate-limit-per-minute: 60
+  rate-limit-per-hour: 1000
+
+mysql:
+  addr: 127.0.0.1:3306
+  username: realworld
+  password: "change-this-local-dev-app-password"
+  database: realworld
+  max-idle-connections: 100
+  max-open-connections: 100
+  max-connection-life-time: 10s
+
+redis:
+  addr: 127.0.0.1:6379
+  password: ""
+  db: 0
+
+jwt:
+  secret: "change-this-local-dev-jwt-secret"
